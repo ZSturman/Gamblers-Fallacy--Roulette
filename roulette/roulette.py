@@ -12,6 +12,7 @@ class Number:
         self.odd = 0
         self.red = 0
         self.black = 0
+        self.green = 0
         self.low = 0
         self.high = 0
         self.first_twlv = 0
@@ -23,7 +24,7 @@ class Number:
         
         # 0 
         if self.num < 1:
-            pass
+            self.green = 1
         else:
             #even or odd
             if self.num%2 == 0:
@@ -59,13 +60,10 @@ class Number:
             else:
                 self.third_twlv = 1
 
-
-
 csv_file = pd.read_csv('numbers.csv')
 
-
 def create_csv():
-    nums = np.random.randint(-1, 37, size=10000)
+    nums = np.random.randint(-1, 37, size=10)
     with open('numbers.csv', 'w', newline='') as f:
         fieldnames = []
         a = Number(nums[0])
@@ -111,6 +109,10 @@ def red_black(csv_file):
     black_sum = csv_file['black'].sum()
     plt.bar("black", black_sum, color="black", width=0.8)
     plt.text("black", black_sum, black_sum)
+
+    zero_sum = csv_file['green'].sum()
+    plt.bar("green", zero_sum, color="#00FF00", width=0.8)
+    plt.text("green", zero_sum, zero_sum)
     
     plt.title('Red vs Black')
     plt.tight_layout()
@@ -182,13 +184,75 @@ def columns(csv_file):
     plt.tight_layout()
     plt.show()
 
+#create_csv()
+#straight_up()
+#red_black(csv_file)
+#even_odd(csv_file)
+#low_high(csv_file)
+#twelve(csv_file)
+#columns(csv_file)
 
 
-create_csv()
-straight_up()
-red_black(csv_file)
-even_odd(csv_file)
-low_high(csv_file)
-twelve(csv_file)
-columns(csv_file)
+""" items = len(csv_file['num'])
+
+red_sum = csv_file['red'].sum()
+plt.bar("red", red_sum, color="#FF0000", width=0.8)
+plt.text("red", red_sum, red_sum)
+black_sum = csv_file['black'].sum()
+plt.bar("black", black_sum, color="black", width=0.8)
+plt.text("black", black_sum, black_sum)
+
+plt.axes([0.05, 0.05, 0.425, 0.9])
+plt.plot(items, red_sum, 'r')
+plt.show()
+ """
+
+
+def generate_streak_info(csv_file, column):
+    data = csv_file[column].to_frame()
+    print("DATA \t", data)
+    print()
+    data['start_of_streak'] = data[column].ne(data[column].shift())
+    data['streak_id'] = data['start_of_streak'].cumsum()
+    data['streak_counter'] = data.groupby('streak_id').cumcount() +1
+    csv_file_with_streaks = pd.concat([csv_file, data['streak_counter']], axis=1)
+    print("generate_streak_info for ", column)
+    print(csv_file_with_streaks[column])
+    print()
+    print()
+    return csv_file_with_streaks
+
+def streak_summary(csv_file, column):
+    summary = generate_streak_info(csv_file, column)
+    summary["streak_type"] = summary[column]
+    summary["streak_length"] = summary["streak_counter"]
+    print("summary[streak_length]")
+    print(summary["streak_length"])
+    print("***")
+    print("streak_summary: ")
+    print(summary[column])
+    print()
+    return summary
+
+def longest_streak(x):
+    longest_streak = x["streak_length"]
+    print("longest_streak")
+    print(longest_streak)
+    longest_streak = max(longest_streak)
+    return longest_streak
+
+
+red = streak_summary(csv_file, "red")
+#black = streak_summary(csv_file, "black")
+#even = streak_summary(csv_file, "even")
+#odd = streak_summary(csv_file, "odd")
+#low = streak_summary(csv_file, "low")
+#high = streak_summary(csv_file, "high")
+
+print("red: \t", longest_streak(red))
+#print("black: \t",longest_streak(black))
+#print("even: \t",longest_streak(even))
+#print("odd: \t",longest_streak(odd))
+#print("low: \t",longest_streak(low))
+#print("high: \t",longest_streak(high))
 
